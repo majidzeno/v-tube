@@ -2,16 +2,13 @@
 
 <template>
 	<div>
-		<a
-			:href="'https://www.youtube.com/watch?v=' + result.id.videoId"
-			target="_blank"
-		>
+		<RouterLink :to="'video/' + result.id.videoId">
 			<img
 				class=""
 				:src="result.snippet.thumbnails.medium.url"
 				alt="YouTube thumbnail"
 			/>
-		</a>
+		</RouterLink>
 		<div class="card-body">
 			<h5 class="card-title">{{ result.snippet.title }}</h5>
 			<h6 class="card-subtitle">

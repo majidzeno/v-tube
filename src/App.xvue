@@ -1,0 +1,156 @@
+<!-- @format -->
+
+<template>
+	<div>
+		<Header />
+		<template> </template>
+		<Filters />
+		<SearchResults
+			v-if="results.length > 0"
+			:results="results"
+			:searchKeywordFormatted="searchKeywordFormatted"
+		/>
+		<button
+			v-if="results.length > 0"
+			:nextPageToken="api.nextPageToken"
+			@click="loadmore"
+		>
+			Load More
+		</button>
+	</div>
+</template>
+<script>
+import { API_KEYS } from "@/../_KEYS";
+import Header from "@components/header";
+import SearchResults from "@components/search-results";
+import Filters from "@components/filters";
+import { eventBus } from "@/main";
+import axios from "axios";
+import moment from "moment";
+
+export default {
+	name: "app",
+	components: { Header, SearchResults, Filters },
+	data() {
+		return {
+			results: [],
+			searchKeywordFormatted: "",
+			lastRequestUrl: "",
+			lastFilterType: "all",
+			api: {
+				baseUrl: "https://www.googleapis.com/youtube/v3/search?",
+				part: "snippet",
+				order: "viewCount",
+				q: "skateboarding%20dog",
+				type: "video",
+				videoDefinition: "high",
+				nextPageToken: "",
+				maxResults: 2,
+				key: API_KEYS.youtube_key,
+			},
+		};
+	},
+	created() {
+		eventBus.$on("search", (searchParams) => {
+			this.searchKeywordFormatted = searchParams.join(" ");
+			this.api.q = searchParams.join("+");
+			const { baseUrl, part, order, q, key, maxResults } = this.api;
+			const SEARCH_URL = `${baseUrl}part=${part}&order=${order}&q=${q}&key=${key}&maxResults=${maxResults}`;
+
+			this.results = [];
+			this.getSearchResult(SEARCH_URL);
+		});
+		eventBus.$on("selectedchange", (filter) => {
+			let today = moment().toISOString();
+			let thisWeek = moment()
+				.add(7, "days")
+				.toISOString();
+			let thisMonth = moment()
+				.add(30, "days")
+				.toISOString();
+
+			if (filter.range) {
+				let date;
+				if (filter.range === "today") {
+					date = today;
+				} else if (filter.range === "this-week") {
+					date = thisWeek;
+				} else if (filter.range === "this-month") {
+					date = thisMonth;
+				}
+				console.log("filter.type", filter.type);
+				if (!filter.type) filter.type = this.lastFilterType;
+				this.filterByTypeAndDate(filter.type, date);
+			} else if (filter.type) {
+				this.lastFilterType = filter.type;
+				this.filterByType(filter.type);
+			}
+		});
+	},
+	methods: {
+		getSearchResult(SEARCH_URL) {
+			axios
+				.get(SEARCH_URL)
+				.then((res) => {
+					// console.log("res -->", res);
+					this.results = [...this.results, ...res.data.items];
+					// console.log("this.results", this.results);
+					// this.results.length > 0
+					// 	? (this.results = [...this.results, ...res.data.items])
+					// 	: (this.results = res.data.items);
+					this.results = Array.from(
+						new Set(this.results.map((a) => a.etag))
+					).map((id) => {
+						return this.results.find((a) => a.etag === id);
+					});
+					this.lastRequestUrl = SEARCH_URL;
+					this.api.nextPageToken = res.data.nextPageToken;
+				})
+				.catch((error) => console.log("ERROR ==>", error));
+		},
+		loadmore() {
+			const {
+				// baseUrl,
+				// part,
+				// order,
+				// q,
+				nextPageToken,
+				// key,
+				// maxResults,
+			} = this.api;
+			// const LOADMORE_URL = `${baseUrl}part=${part}&order=${order}&q=${q}&key=${key}&maxResults=${maxResults}&pageToken=${nextPageToken}`;
+			const LOADMORE_URL = `${this.lastRequestUrl}&pageToken=${nextPageToken}`;
+
+			this.getSearchResult(LOADMORE_URL);
+		},
+		filterByType(type) {
+			const { baseUrl, part, order, q, key, maxResults } = this.api;
+			const TYPE_FILTER_URL = `${baseUrl}part=${part}&order=${order}&q=${q}&key=${key}&maxResults=${maxResults}&type=${type}`;
+			this.results = [];
+			this.getSearchResult(TYPE_FILTER_URL);
+		},
+		filterByDate(date) {
+			const { baseUrl, part, order, q, key, maxResults } = this.api;
+			const DATE_FILTER_URL = `${baseUrl}part=${part}&order=${order}&q=${q}&key=${key}&maxResults=${maxResults}&publishedAfter=${date}`;
+			console.log("DATE_FILTER_URL", DATE_FILTER_URL);
+			this.results = [];
+			this.getSearchResult(DATE_FILTER_URL);
+		},
+		filterByTypeAndDate(type, date) {
+			console.log("date in here is", date);
+			console.log("type in here is", type);
+			const { baseUrl, part, order, q, key, maxResults } = this.api;
+			const TYPE_DATE_FILTER_URL = `${baseUrl}part=${part}&order=${order}&q=${q}&key=${key}&maxResults=${maxResults}&type=${type}&publishedAfter=${date}`;
+			console.log("TYPE_DATE_FILTER_URL", TYPE_DATE_FILTER_URL);
+			this.results = [];
+			this.getSearchResult(TYPE_DATE_FILTER_URL);
+		},
+	},
+};
+</script>
+<style lang="scss">
+@import "./app";
+div {
+	background-color: "purple";
+}
+</style>
