@@ -14,7 +14,8 @@
 		"moment": "2.27.0",
 		"vue": "^2.6.11",
 		"vue-router": "3.4.3",
-		"vue-youtube-embed": "2.2.2"
+		"vue-youtube-embed": "2.2.2",
+		"ytsearcher": "1.2.2"
 	},
 	"devDependencies": {
 		"@vue/cli-plugin-babel": "~4.5.0",

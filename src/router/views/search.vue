@@ -3,13 +3,13 @@
 <script>
 import appConfig from "@/app.config";
 import Layout from "@layout";
-import { API_KEYS } from "@/../_KEYS";
+// import { API_KEYS } from "@/../_KEYS";
 import SearchResults from "@components/search-results";
 import Filters from "@components/filters";
 import { eventBus } from "@/main";
-import axios from "axios";
+// import axios from "axios";
 import moment from "moment";
-
+import { _searchAll, _loadMore, _filterByType, _filterByDate } from "@api";
 export default {
 	page: {
 		title: "Search",
@@ -19,35 +19,24 @@ export default {
 	data() {
 		return {
 			results: [],
+			keyword: "",
 			searchKeywordFormatted: "",
-			lastRequestUrl: "",
+			filter: { kind: "", arg: "" },
 			lastFilterType: "all",
-			api: {
-				baseUrl: "https://www.googleapis.com/youtube/v3/search?",
-				part: "snippet",
-				order: "viewCount",
-				q: "skateboarding%20dog",
-				type: "video",
-				videoDefinition: "high",
-				nextPageToken: "",
-				maxResults: 2,
-				key: API_KEYS.youtube_key,
-			},
+			nextPageToken: "",
 		};
 	},
 	mounted() {
-		this.getSearchResult(
-			`https://www.googleapis.com/youtube/v3/search?part=snippet&order=viewCount&q=spongebob&key=${API_KEYS.youtube_key}&maxResults=2`
-		);
+		// this.getSearchResult(
+		// 	`https://www.googleapis.com/youtube/v3/search?part=snippet&order=viewCount&q=spongebob&key=${API_KEYS.youtube_key}&maxResults=2`
+		// );
 	},
 	created() {
 		eventBus.$on("search", (searchParams) => {
 			this.searchKeywordFormatted = searchParams.join(" ");
-			this.api.q = searchParams.join("+");
-			const { baseUrl, part, order, q, key, maxResults } = this.api;
-			const SEARCH_URL = `${baseUrl}part=${part}&order=${order}&q=${q}&key=${key}&maxResults=${maxResults}`;
+			this.keyword = searchParams.join("+");
 			this.results = [];
-			this.getSearchResult(SEARCH_URL);
+			this.getSearchResult(this.keyword);
 		});
 		eventBus.$on("selectedchange", (filter) => {
 			let today = moment().toISOString();
@@ -77,63 +66,77 @@ export default {
 		});
 	},
 	methods: {
-		getSearchResult(SEARCH_URL) {
-			axios
-				.get(SEARCH_URL)
+		getSearchResult(searchKeyword) {
+			_searchAll(searchKeyword)
 				.then((res) => {
-					// console.log("res -->", res);
 					this.results = [...this.results, ...res.data.items];
-					// console.log("this.results", this.results);
-					// this.results.length > 0
-					// 	? (this.results = [...this.results, ...res.data.items])
-					// 	: (this.results = res.data.items);
 					this.results = Array.from(
 						new Set(this.results.map((a) => a.etag))
 					).map((id) => {
 						return this.results.find((a) => a.etag === id);
 					});
-					this.lastRequestUrl = SEARCH_URL;
-					this.api.nextPageToken = res.data.nextPageToken;
+					this.nextPageToken = res.data.nextPageToken;
+				})
+				.catch((error) => console.log("ERROR in search ==>", error));
+		},
+		loadmore() {
+			// const LOADMORE_URL = `${baseUrl}part=${part}&order=${order}&q=${q}&key=${key}&maxResults=${maxResults}&pageToken=${nextPageToken}`;
+			// const LOADMORE_URL = `${this.lastRequestUrl}&pageToken=${nextPageToken}`;
+			// this.getSearchResult(LOADMORE_URL);
+			_loadMore(this.keyword, this.nextPageToken, this.filter)
+				.then((res) => {
+					this.results = [...this.results, ...res.data.items];
+					this.results = Array.from(
+						new Set(this.results.map((a) => a.etag))
+					).map((id) => {
+						return this.results.find((a) => a.etag === id);
+					});
+					this.lastRequestUrl = this.$route.fullPath;
+					this.nextPageToken = res.data.nextPageToken;
 				})
 				.catch((error) => console.log("ERROR ==>", error));
 		},
-		loadmore() {
-			const {
-				// baseUrl,
-				// part,
-				// order,
-				// q,
-				nextPageToken,
-				// key,
-				// maxResults,
-			} = this.api;
-			// const LOADMORE_URL = `${baseUrl}part=${part}&order=${order}&q=${q}&key=${key}&maxResults=${maxResults}&pageToken=${nextPageToken}`;
-			const LOADMORE_URL = `${this.lastRequestUrl}&pageToken=${nextPageToken}`;
-
-			this.getSearchResult(LOADMORE_URL);
-		},
 		filterByType(type) {
-			const { baseUrl, part, order, q, key, maxResults } = this.api;
-			const TYPE_FILTER_URL = `${baseUrl}part=${part}&order=${order}&q=${q}&key=${key}&maxResults=${maxResults}&type=${type}`;
-			this.results = [];
-			this.getSearchResult(TYPE_FILTER_URL);
+			this.filter.kind = "type";
+			this.filter.arg = type;
+			_filterByType(this.keyword, type)
+				.then((res) => {
+					this.results = [];
+					this.results = [...res.data.items];
+					this.results = Array.from(
+						new Set(this.results.map((a) => a.etag))
+					).map((id) => {
+						return this.results.find((a) => a.etag === id);
+					});
+					this.nextPageToken = res.data.nextPageToken;
+				})
+				.catch((error) => console.log("ERROR in filterbytype ==>", error));
 		},
 		filterByDate(date) {
-			const { baseUrl, part, order, q, key, maxResults } = this.api;
-			const DATE_FILTER_URL = `${baseUrl}part=${part}&order=${order}&q=${q}&key=${key}&maxResults=${maxResults}&publishedAfter=${date}`;
-			console.log("DATE_FILTER_URL", DATE_FILTER_URL);
-			this.results = [];
-			this.getSearchResult(DATE_FILTER_URL);
+			this.filter.kind = "date";
+			this.filter.arg = date;
+			_filterByDate(this.keyword, date)
+				.then((res) => {
+					this.results = [];
+					this.results = [...res.data.items];
+					this.results = Array.from(
+						new Set(this.results.map((a) => a.etag))
+					).map((id) => {
+						return this.results.find((a) => a.etag === id);
+					});
+					this.nextPageToken = res.data.nextPageToken;
+				})
+				.catch((error) => console.log("ERROR in filterbydate ==>", error));
 		},
-		filterByTypeAndDate(type, date) {
-			console.log("date in here is", date);
-			console.log("type in here is", type);
-			const { baseUrl, part, order, q, key, maxResults } = this.api;
-			const TYPE_DATE_FILTER_URL = `${baseUrl}part=${part}&order=${order}&q=${q}&key=${key}&maxResults=${maxResults}&type=${type}&publishedAfter=${date}`;
-			console.log("TYPE_DATE_FILTER_URL", TYPE_DATE_FILTER_URL);
-			this.results = [];
-			this.getSearchResult(TYPE_DATE_FILTER_URL);
-		},
+		// filterByTypeAndDate(type, date) {
+		// 	console.log("date in here is", date);
+		// 	console.log("type in here is", type);
+		// 	const { baseUrl, part, order, q, key, maxResults } = this.api;
+		// 	const TYPE_DATE_FILTER_URL = `${baseUrl}part=${part}&order=${order}&q=${q}&key=${key}&maxResults=${maxResults}&type=${type}&publishedAfter=${date}`;
+		// 	console.log("TYPE_DATE_FILTER_URL", TYPE_DATE_FILTER_URL);
+		// 	this.results = [];
+		// 	this.getSearchResult(TYPE_DATE_FILTER_URL);
+		// },
 	},
 };
 </script>
@@ -148,7 +151,7 @@ export default {
 		/>
 		<button
 			v-if="results.length > 0"
-			:nextPageToken="api.nextPageToken"
+			:nextPageToken="nextPageToken"
 			@click="loadmore"
 		>
 			Load More

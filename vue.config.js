@@ -14,6 +14,7 @@ module.exports = {
 				"@router": path.resolve(__dirname, "./src/router"),
 				"@views": path.resolve(__dirname, "./src/router/views"),
 				"@layout": path.resolve(__dirname, "./src/router/layout"),
+				"@api": path.resolve(__dirname, "./api.js"),
 			},
 			extensions: [".js", ".vue", ".json"],
 		},

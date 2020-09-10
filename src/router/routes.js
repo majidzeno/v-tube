@@ -3,6 +3,7 @@
 import Search from "@views/search";
 import Channel from "@views/channel";
 import Video from "@views/video";
+import Playlist from "@views/playlist";
 import NotFound from "@views/_404";
 // /search?query={txt}
 export default [
@@ -15,6 +16,11 @@ export default [
 		path: "/channel/:channelId",
 		name: "channel",
 		component: Channel,
+	},
+	{
+		path: "/playlist/:playlistId",
+		name: "playlist",
+		component: Playlist,
 	},
 	{
 		path: "/video/:videoId",
