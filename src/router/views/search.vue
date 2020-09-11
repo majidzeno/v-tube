@@ -3,11 +3,8 @@
 <script>
 import appConfig from "@/app.config";
 import Layout from "@layout";
-// import { API_KEYS } from "@/../_KEYS";
 import SearchResults from "@components/search-results";
-import Filters from "@components/filters";
 import { eventBus } from "@/main";
-// import axios from "axios";
 import moment from "moment";
 import { _searchAll, _loadMore, _filterByType, _filterByDate } from "@api";
 export default {
@@ -15,15 +12,27 @@ export default {
 		title: "Search",
 		meta: [{ name: "Search", content: appConfig.description }],
 	},
-	components: { Layout, SearchResults, Filters },
+	components: { Layout, SearchResults },
 	data() {
 		return {
 			results: [],
-			keyword: "",
+			keyword: this.$route.query.query,
 			searchKeywordFormatted: "",
 			filter: { kind: "", arg: "" },
 			lastFilterType: "all",
 			nextPageToken: "",
+			selectedType: "",
+			types: {
+				All: "all",
+				Channel: "channel",
+				Playlist: "playlist",
+			},
+			selectedRange: "",
+			ranges: {
+				Today: "today",
+				"This Week": "this-week",
+				"This Month": "this-month",
+			},
 		};
 	},
 	mounted() {
@@ -32,43 +41,25 @@ export default {
 		// );
 	},
 	created() {
+		this.$router.push("path").catch((error) => {
+			if (error.name != "NavigationDuplicated") {
+				throw error;
+			}
+		});
 		eventBus.$on("search", (searchParams) => {
 			this.searchKeywordFormatted = searchParams.join(" ");
 			this.keyword = searchParams.join("+");
 			this.results = [];
 			this.getSearchResult(this.keyword);
 		});
-		eventBus.$on("selectedchange", (filter) => {
-			let today = moment().toISOString();
-			let thisWeek = moment()
-				.add(7, "days")
-				.toISOString();
-			let thisMonth = moment()
-				.add(30, "days")
-				.toISOString();
-
-			if (filter.range) {
-				let date;
-				if (filter.range === "today") {
-					date = today;
-				} else if (filter.range === "this-week") {
-					date = thisWeek;
-				} else if (filter.range === "this-month") {
-					date = thisMonth;
-				}
-				console.log("filter.type", filter.type);
-				if (!filter.type) filter.type = this.lastFilterType;
-				this.filterByTypeAndDate(filter.type, date);
-			} else if (filter.type) {
-				this.lastFilterType = filter.type;
-				this.filterByType(filter.type);
-			}
-		});
 	},
 	methods: {
 		getSearchResult(searchKeyword) {
+			// console.log("initiated");
 			_searchAll(searchKeyword)
 				.then((res) => {
+					// console.log("res", res);
+					this.results = [];
 					this.results = [...this.results, ...res.data.items];
 					this.results = Array.from(
 						new Set(this.results.map((a) => a.etag))
@@ -99,6 +90,8 @@ export default {
 		filterByType(type) {
 			this.filter.kind = "type";
 			this.filter.arg = type;
+			// console.log("keyword", this.keyword);
+			// console.log("type", type);
 			_filterByType(this.keyword, type)
 				.then((res) => {
 					this.results = [];
@@ -113,37 +106,81 @@ export default {
 				.catch((error) => console.log("ERROR in filterbytype ==>", error));
 		},
 		filterByDate(date) {
+			let todayDate = moment().toISOString();
+			let thisWeekDate = moment()
+				.subtract(7, "days")
+				.toISOString();
+			let thisMonthDate = moment()
+				.subtract(30, "days")
+				.toISOString();
+			let filterDate;
+			if (date === "today") {
+				filterDate = todayDate;
+			} else if (date === "this-week") {
+				filterDate = thisWeekDate;
+			} else if (date === "this-month") {
+				filterDate = thisMonthDate;
+			}
 			this.filter.kind = "date";
-			this.filter.arg = date;
-			_filterByDate(this.keyword, date)
+			this.filter.arg = filterDate;
+
+			_filterByDate(this.keyword, filterDate)
 				.then((res) => {
 					this.results = [];
 					this.results = [...res.data.items];
-					this.results = Array.from(
-						new Set(this.results.map((a) => a.etag))
-					).map((id) => {
-						return this.results.find((a) => a.etag === id);
-					});
 					this.nextPageToken = res.data.nextPageToken;
 				})
 				.catch((error) => console.log("ERROR in filterbydate ==>", error));
 		},
-		// filterByTypeAndDate(type, date) {
-		// 	console.log("date in here is", date);
-		// 	console.log("type in here is", type);
-		// 	const { baseUrl, part, order, q, key, maxResults } = this.api;
-		// 	const TYPE_DATE_FILTER_URL = `${baseUrl}part=${part}&order=${order}&q=${q}&key=${key}&maxResults=${maxResults}&type=${type}&publishedAfter=${date}`;
-		// 	console.log("TYPE_DATE_FILTER_URL", TYPE_DATE_FILTER_URL);
-		// 	this.results = [];
-		// 	this.getSearchResult(TYPE_DATE_FILTER_URL);
-		// },
+		resetFilter(arg) {
+			this[arg] = "";
+			this.getSearchResult(this.keyword);
+		},
+	},
+	watch: {
+		selectedType: function(newValue) {
+			this.selectedType = newValue;
+			this.selectedRange = "";
+			if (newValue !== "") {
+				this.filterByType(this.selectedType);
+			}
+		},
+		selectedRange: function(newValue) {
+			this.selectedRange = newValue;
+			this.selectedType = "";
+			// console.log("this.selectedRange", this.selectedRange);
+			if (newValue !== "") {
+				this.filterByDate(this.selectedRange);
+			}
+		},
 	},
 };
 </script>
 
 <template>
 	<Layout>
-		<Filters />
+		<!-- <Filters /> -->
+		<div class="filters">
+			<div>
+				<!-- <label for="typeFilter">Type</label> -->
+				<select v-model="selectedType" id="typeFilter">
+					<option value="" disabled>Type</option>
+					<option v-for="(value, text) in types" :value="value" :key="value">{{
+						text
+					}}</option>
+				</select>
+				<button @click="resetFilter('selectedType')">Reset</button>
+			</div>
+			<div>
+				<select v-model="selectedRange">
+					<option value="" disabled>Upload Date</option>
+					<option v-for="(value, text) in ranges" :value="value" :key="value">{{
+						text
+					}}</option>
+				</select>
+				<button @click="resetFilter('selectedRange')">Reset</button>
+			</div>
+		</div>
 		<SearchResults
 			v-if="results.length > 0"
 			:results="results"
