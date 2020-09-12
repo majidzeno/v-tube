@@ -6,7 +6,6 @@ const baseUrl = "https://www.googleapis.com/youtube/v3";
 
 // All types  Search
 export const _searchAll = (keyword) => {
-	console.log("api_key", api_key);
 	return axios.get(
 		`${baseUrl}/search?part=snippet&q=${keyword}&maxResults=12&key=${api_key}`
 	);

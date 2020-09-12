@@ -15,6 +15,7 @@ module.exports = {
 				"@views": path.resolve(__dirname, "./src/router/views"),
 				"@layout": path.resolve(__dirname, "./src/router/layout"),
 				"@api": path.resolve(__dirname, "./src/api"),
+				"@design": path.resolve(__dirname, "./src/design"),
 			},
 			extensions: [".js", ".vue", ".json"],
 		},
@@ -22,11 +23,26 @@ module.exports = {
 	css: {
 		loaderOptions: {
 			sass: {
-				// additionalData: `@import "~@/variables.sass"`,
+				additionalData: `@import "@design"`,
 			},
 			scss: {
-				// additionalData: `@import "~@/variables.scss";`,
+				additionalData: `@import "@design";`,
 			},
 		},
+	},
+	chainWebpack: (config) => {
+		config.module
+			.rule("fonts")
+			.test(/\.(ttf|otf|eot|woff|woff2)$/)
+			.use("file-loader")
+			.loader("file-loader")
+			.tap((options) => {
+				options = {
+					limit: 10000,
+					name: "/assets/fonts/[name].[ext]",
+				};
+				return options;
+			})
+			.end();
 	},
 };

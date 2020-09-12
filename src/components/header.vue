@@ -2,11 +2,6 @@
 
 <template>
 	<div class="header">
-		<ul>
-			<!-- <li><RouterLink to="search?query=heybrother">Search</RouterLink></li> -->
-			<li><RouterLink to="channel/10">Channel</RouterLink></li>
-			<li><RouterLink to="video/he">Video</RouterLink></li>
-		</ul>
 		<Searchbar />
 	</div>
 </template>
@@ -18,3 +13,9 @@ export default {
 	},
 };
 </script>
+<style lang="scss">
+.header {
+	background-color: $color-main;
+	/* color: $color-main; */
+}
+</style>

@@ -12,8 +12,10 @@
 		"axios": "0.20.0",
 		"core-js": "^3.6.5",
 		"dotenv": "8.2.0",
+		"lodash": "4.17.20",
 		"moment": "2.27.0",
 		"vue": "^2.6.11",
+		"vue-inline-svg": "2.0.0",
 		"vue-router": "3.4.3",
 		"vue-youtube-embed": "2.2.2",
 		"ytsearcher": "1.2.2"

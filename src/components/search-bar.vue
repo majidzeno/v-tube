@@ -1,76 +1,205 @@
 <!-- @format -->
 
-<template>
-	<div>
-		<form action="">
-			Logo here Search Bar
-			<input
-				type="text"
-				v-model="keyword"
-				@keydown.13.prevent="parseSearch"
-				placeholder="Search ..."
-			/>
-			<button @click.prevent="parseSearch">Search</button>
-			<!-- <RouterLink tag="button"></RouterLink> -->
-		</form>
-		<h1>{{ keyword }}</h1>
-	</div>
-</template>
 <script>
 import { eventBus } from "../main";
+import _ from "lodash";
+
 export default {
 	data() {
 		return {
-			keyword: this.$route.query.query || "spongebob",
-			lastKeyword: "spongebob",
+			// keyword: this.$route.query.query || "spongebob",
+			keyword: "Spongebob",
+			lastKeyword: "",
 		};
 	},
 	methods: {
+		resetSearch() {
+			this.keyword = "";
+		},
 		parseSearch() {
-			// console.log("this.$route.params", this.$route);
 			if (this.keyword.trim() !== "") {
 				const searchParams = this.keyword.trim().split(/\s+/);
-				// console.log("this.$route.fullPath", this.$route.fullPath);
-				// console.log(
-				// 	'"/search?query=" + this.keyword',
-				// 	"/search?query=" + this.keyword
-				// );
-				// if (
-				// 	searchParams[0] === this.lastKeyword &&
-				// 	this.$route.fullPath === "/search?query=" + this.keyword
-				// ) {
-				// 	// alert("sdf");
-				// 	// this.$router.push({
-				// 	// 	name: "search",
-				// 	// 	query: { query: this.keyword },
-				// 	// });
-				// 	return;
-				// } else
 				if (searchParams[0] === this.lastKeyword) {
-					this.$router.replace({
-						name: "search",
-						// path: "/search",
-						query: { query: this.keyword },
-					});
+					this.$router
+						.replace({
+							name: "search",
+							// path: "/search",
+							query: { query: this.keyword },
+						})
+						.catch((error) => {
+							if (error.name != "NavigationDuplicated") {
+								throw error;
+							}
+						});
 				}
-				// this.$emit("search", searchParams);
 				eventBus.$emit("search", searchParams);
-
-				this.$router.push({
-					name: "search",
-					// path: "/search",
-					query: { query: this.keyword },
-				});
+				this.$router
+					.push({
+						name: "search",
+						query: { query: this.keyword },
+					})
+					.catch((error) => {
+						if (error.name != "NavigationDuplicated") {
+							throw error;
+						}
+					});
 				this.lastKeyword = this.keyword;
 				this.keyword = this.$route.query.query;
 			}
 		},
 	},
 	created() {
-		// console.log("this.$router", this.$router);
-		// console.log("this.$route", this.$route);
-		// console.log("this.lastKeyword", this.lastKeyword);
-		// console.log("this.keyword.trim", this.keyword.trim().split(/\s+/));
+		this.parseSearch = _.debounce(this.parseSearch, 1000);
 	},
 };
 </script>
+
+<template>
+	<div class="searchBar">
+		<inline-svg
+			class="searchBar__logo"
+			:src="require('../assets/svg/youtube.svg')"
+		/>
+		<form class="searchBar__form form">
+			<div class="form__inputContainer">
+				<input
+					type="text"
+					v-model="keyword"
+					@keydown.13.prevent="parseSearch"
+					placeholder="Search"
+					class="form__input"
+				/>
+				<button class="form__resetInput" @click.prevent="resetSearch">
+					<inline-svg
+						class="form__cancelIcon"
+						:src="require('../assets/svg/cancel.svg')"
+					/>
+				</button>
+			</div>
+
+			<button @click.prevent="parseSearch" class="form__searchButton">
+				<inline-svg
+					class="form__searchIcon"
+					:src="require('../assets/svg/searchIcon.svg')"
+				/>
+			</button>
+		</form>
+	</div>
+</template>
+
+<style lang="scss">
+.searchBar {
+	display: flex;
+	justify-content: space-between;
+	align-items: stretch;
+	&__logo {
+		max-width: 12%;
+		width: 100%;
+		padding: 3%;
+		> path {
+			fill: #fff;
+		}
+	}
+	&__form {
+		max-width: 85%;
+		width: 100%;
+		display: flex;
+		align-items: stretch;
+		justify-content: space-between;
+		padding: 4% 0%;
+	}
+	.form {
+		&__inputContainer {
+			display: flex;
+			width: 100%;
+			max-width: 80%;
+			&:focus-within {
+				outline: 1px solid $color-outline;
+				.form {
+					&__input {
+						color: $color-heading-text;
+						background-color: $color-body-bg;
+						border-color: $color-border;
+						box-shadow: inset 0 1px 2px $color-shadow;
+					}
+					&__resetInput {
+						background: #fff;
+						border-color: $color-border;
+						box-shadow: inset 0 1px 2px $color-shadow;
+					}
+					&__cancelIcon {
+						fill: #000;
+					}
+				}
+			}
+		}
+		&__searchButton {
+			max-width: 20%;
+			width: 100%;
+			background-color: transparent;
+			border: none;
+			padding: 2%;
+			outline: none;
+			cursor: pointer;
+			&:focus {
+				&__searchIcon {
+					outline: 1px solid $color-outline;
+				}
+			}
+		}
+		&__searchIcon {
+			background-color: transparent;
+			width: 40%;
+			height: auto;
+			path {
+				fill: #fff;
+			}
+		}
+		&__input {
+			width: 100%;
+			padding: 2%;
+			border-radius: 2px;
+			border-right: 0;
+			border-top-right-radius: 0;
+			border-bottom-right-radius: 0;
+			background-color: $color-main;
+			color: #fff;
+			border: 1px solid $color-main;
+			box-shadow: inset 0 1px 2px $color-main;
+			backface-visibility: hidden;
+			-webkit-backface-visibility: hidden;
+			&:focus {
+				outline: none;
+			}
+		}
+		&__resetInput {
+			background: #fff;
+			border: 1px solid $color-border;
+			box-shadow: inset 0 1px 2px $color-shadow;
+			border-radius: 2px;
+			border-left: 0;
+			border-top-left-radius: 0;
+			border-bottom-left-radius: 0;
+			margin-left: -1px;
+			display: flex;
+			align-items: center;
+			padding: 1em;
+			cursor: pointer;
+			background: $color-main;
+			border-color: $color-main;
+			box-shadow: inset 0 1px 2px $color-main;
+			backface-visibility: hidden;
+			-webkit-backface-visibility: hidden;
+			&:focus {
+				outline: none;
+			}
+		}
+		&__cancelIcon {
+			width: 0.75em;
+			fill: $color-main;
+			backface-visibility: hidden;
+			-webkit-backface-visibility: hidden;
+		}
+	}
+}
+</style>
