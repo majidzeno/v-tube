@@ -6,13 +6,13 @@
 </template>
 
 <script>
-// const dotenv = require("dotenv").config();
 export default {
 	name: "app",
-	// data() {
-	// 	return {
-	// 		dotenv,
-	// 	};
-	// },
 };
 </script>
+
+<style lang="scss">
+body {
+	background-color: #f9f9f9;
+}
+</style>

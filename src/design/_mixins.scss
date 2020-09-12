@@ -1,6 +1,11 @@
 /** @format */
 
 @mixin breakpoint($breakpoint) {
+	@if $breakpoint==laptop {
+		@media only screen and (min-width: 600px) {
+			@content;
+		}
+	}
 	@if $breakpoint==tablet {
 		@media only screen and (max-width: 600px) {
 			@content;

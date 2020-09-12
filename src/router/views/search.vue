@@ -409,7 +409,7 @@ export default {
 					},
 				},
 			],
-
+			desktop: false,
 			loading: false,
 			keyword: this.$route.query.query,
 			searchKeywordFormatted: "",
@@ -430,7 +430,13 @@ export default {
 			},
 		};
 	},
+
 	mounted() {
+		if (window.innerWidth > 600) {
+			this.desktop = true;
+		} else {
+			this.desktop = false;
+		}
 		// this.getSearchResult(
 		// 	`https://www.googleapis.com/youtube/v3/search?part=snippet&order=viewCount&q=spongebob&key=${API_KEYS.youtube_key}&maxResults=2`
 		// );
@@ -486,8 +492,11 @@ export default {
 			this.loading = true;
 			this.filter.kind = "type";
 			this.filter.arg = type;
+			console.log("type", type);
+			console.log("this.keyword", this.keyword);
 			_filterByType(this.keyword, type)
 				.then((res) => {
+					console.log("res", res);
 					this.results = [];
 					this.results = [...res.data.items];
 					this.results = Array.from(
@@ -536,6 +545,7 @@ export default {
 		},
 		resetFilter(arg) {
 			this[arg] = "";
+			document.getElementById(this.filter.arg).checked = false;
 			this.getSearchResult(this.keyword);
 		},
 	},
@@ -552,6 +562,14 @@ export default {
 			this.selectedType = "";
 			if (newValue !== "") {
 				this.filterByDate(this.selectedRange);
+			}
+		},
+		desktop: function() {
+			console.log("desktop", this.desktop);
+			if (window.innerWidth > 600) {
+				this.desktop = true;
+			} else {
+				this.desktop = false;
 			}
 		},
 	},
@@ -580,6 +598,62 @@ export default {
 				<!-- <button @click="resetFilter('selectedRange')">Reset</button> -->
 			</div>
 		</div>
+		<div class="filters-desktop">
+			<button
+				class="filterButton"
+				@click.prevent="$event.target.classList.toggle('active')"
+			>
+				<inline-svg
+					class="filterButton__icon"
+					:src="require('@assets/svg/filter.svg')"
+				/>
+				<span class="filterButton__text">filter</span>
+			</button>
+			<div class="filters-desktop__wrapper">
+				<div class="filter-desktop">
+					<h4>Type</h4>
+					<div class="filter-cell" v-for="(value, text) in types" :key="value">
+						<input
+							name="type"
+							type="radio"
+							:id="value"
+							:value="value"
+							v-model="selectedType"
+						/>
+						<label :for="value">
+							{{ text }}
+						</label>
+						<button class="resetFilterBtn" @click="resetFilter">
+							<inline-svg
+								class="resetFilterBtn__icon"
+								:src="require('@assets/svg/cancel.svg')"
+							/>
+						</button>
+					</div>
+				</div>
+				<div class="filter-desktop">
+					<h4>Upload Date</h4>
+					<div class="filter-cell" v-for="(value, text) in ranges" :key="value">
+						<input
+							name="type"
+							type="radio"
+							:id="value"
+							:value="value"
+							v-model="selectedRange"
+						/>
+						<label :for="value">
+							{{ text }}
+						</label>
+						<button class="resetFilterBtn" @click="resetFilter">
+							<inline-svg
+								class="resetFilterBtn__icon"
+								:src="require('@assets/svg/cancel.svg')"
+							/>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
 		<Spinner v-if="loading" />
 		<SearchResults
 			v-else
@@ -587,6 +661,14 @@ export default {
 			:results="results"
 			:searchKeywordFormatted="searchKeywordFormatted"
 		/>
+		<scroll-loader
+			class="desktop-loader"
+			:loader-method="loadmore"
+			:loader-enable="desktop"
+		>
+			<Spinner />
+		</scroll-loader>
+
 		<button
 			v-if="results.length > 0"
 			:nextPageToken="nextPageToken"
@@ -604,6 +686,9 @@ export default {
 	border-bottom: 1px solid $color-border;
 	display: flex;
 	padding: 2%;
+	@include breakpoint(laptop) {
+		display: none;
+	}
 }
 .filterContainer {
 	select {
@@ -630,5 +715,116 @@ export default {
 	border-top: 1px solid #ccc;
 	cursor: pointer;
 	@extend %font-content;
+	@include breakpoint(laptop) {
+		display: none;
+	}
+}
+.filters-desktop {
+	display: none;
+	border-bottom: 1px solid $color-border;
+	padding: 2%;
+	background-color: $color-body-bg;
+	@include breakpoint(laptop) {
+		display: flex;
+		align-items: flex-end;
+		justify-content: center;
+		flex-direction: column;
+	}
+	&__wrapper {
+		width: 100%;
+		display: flex;
+		justify-content: center;
+		height: 0;
+		transition: 0.5s all ease;
+		overflow: hidden;
+		/* align-items: flex-end; */
+	}
+}
+.filter-desktop {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: center;
+	width: 20%;
+	padding: 10%;
+	@extend %font-subheading;
+	h4 {
+		color: $color-heading-text;
+		border-bottom: 1px solid $color-border;
+		padding-bottom: 3%;
+		width: 100%;
+	}
+	label {
+		cursor: pointer;
+	}
+	input {
+		-webkit-appearance: none;
+		-moz-appearance: none;
+		-ms-appearance: none;
+		-o-appearance: none;
+		appearance: none;
+		position: absolute;
+	}
+	input[type="radio"]:checked {
+		~ button {
+			display: block;
+		}
+		~ label {
+			color: black;
+			font-weight: bold;
+		}
+	}
+}
+.filterButton {
+	border: none;
+	background-color: transparent;
+	cursor: pointer;
+	&__icon {
+		width: 14px;
+		height: 14px;
+		margin-right: 6px;
+		fill: $color-text;
+		pointer-events: none;
+	}
+	&__text {
+		text-transform: uppercase;
+		pointer-events: none;
+		color: $color-text;
+	}
+	&.active {
+		.filterButton {
+			&__icon {
+				fill: #000;
+			}
+			&__text {
+				color: #000;
+			}
+		}
+		+ .filters-desktop__wrapper {
+			height: 200px;
+		}
+	}
+}
+.filter-cell {
+	padding: 3%;
+	width: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+.resetFilterBtn {
+	background-color: transparent;
+	border: none;
+	display: none;
+	cursor: pointer;
+	&__icon {
+		width: 10px;
+	}
+}
+.desktop-loader {
+	display: none;
+	@include breakpoint(laptop) {
+		display: block;
+	}
 }
 </style>

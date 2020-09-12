@@ -60,6 +60,11 @@ export default {
 			class="searchBar__logo"
 			:src="require('../assets/svg/youtube.svg')"
 		/>
+		<inline-svg
+			class="searchBar__logofull"
+			:src="require('../assets/svg/youtube_full.svg')"
+		/>
+
 		<form class="searchBar__form form">
 			<div class="form__inputContainer">
 				<input
@@ -92,6 +97,9 @@ export default {
 	display: flex;
 	justify-content: space-between;
 	align-items: stretch;
+	@include breakpoint(laptop) {
+		max-width: 90%;
+	}
 	&__logo {
 		max-width: 12%;
 		width: 100%;
@@ -99,7 +107,20 @@ export default {
 		> path {
 			fill: #fff;
 		}
+		@include breakpoint(laptop) {
+			display: none;
+		}
 	}
+	&__logofull {
+		display: none;
+		@include breakpoint(laptop) {
+			display: block;
+			height: auto;
+			max-width: 100px;
+			width: 100%;
+		}
+	}
+
 	&__form {
 		max-width: 85%;
 		width: 100%;
@@ -107,12 +128,21 @@ export default {
 		align-items: stretch;
 		justify-content: space-between;
 		padding: 4% 0%;
+		@include breakpoint(laptop) {
+			max-width: 80%;
+			padding: 1% 0%;
+		}
 	}
 	.form {
 		&__inputContainer {
 			display: flex;
 			width: 100%;
 			max-width: 80%;
+			@include breakpoint(laptop) {
+				max-width: 90%;
+				align-items: center;
+				margin-right: -1px;
+			}
 			&:focus-within {
 				outline: 1px solid $color-outline;
 				.form {
@@ -141,6 +171,14 @@ export default {
 			padding: 2%;
 			outline: none;
 			cursor: pointer;
+			@include breakpoint(laptop) {
+				padding: 0;
+				max-width: 10%;
+				background-color: #f8f8f8;
+				border: 1px solid $color-border;
+				border-radius: 2px;
+				border-left: 0;
+			}
 			&:focus {
 				&__searchIcon {
 					outline: 1px solid $color-outline;
@@ -153,6 +191,12 @@ export default {
 			height: auto;
 			path {
 				fill: #fff;
+			}
+			@include breakpoint(laptop) {
+				width: 25%;
+				path {
+					fill: #8b8b8b;
+				}
 			}
 		}
 		&__input {
@@ -170,6 +214,13 @@ export default {
 			-webkit-backface-visibility: hidden;
 			&:focus {
 				outline: none;
+			}
+			@include breakpoint(laptop) {
+				padding: 1%;
+				color: $color-heading-text;
+				background-color: $color-body-bg;
+				border-color: $color-border;
+				box-shadow: inset 0 1px 2px $color-shadow;
 			}
 		}
 		&__resetInput {
@@ -192,6 +243,9 @@ export default {
 			-webkit-backface-visibility: hidden;
 			&:focus {
 				outline: none;
+			}
+			@include breakpoint(laptop) {
+				display: none;
 			}
 		}
 		&__cancelIcon {

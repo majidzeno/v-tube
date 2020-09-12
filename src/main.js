@@ -5,10 +5,12 @@ import App from "./App.vue";
 import { router } from "@router";
 import VueYouTubeEmbed from "vue-youtube-embed";
 import { InlineSvgPlugin } from "vue-inline-svg";
+import ScrollLoader from "vue-scroll-loader";
 
 Vue.config.productionTip = false;
 Vue.use(VueYouTubeEmbed);
 Vue.use(InlineSvgPlugin);
+Vue.use(ScrollLoader);
 
 Vue.filter("formatDate", function(value) {
 	if (!value) return "";

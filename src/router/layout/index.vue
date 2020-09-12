@@ -9,21 +9,18 @@ export default {
 </script>
 
 <template>
-	<div>
+	<div class="appContainer">
 		<Header />
 		<slot />
 	</div>
 </template>
 
-<style lang="scss" module>
-/* @import '@design'; */
-/* .container { */
-/* min-width: $size-content-width-min;
-  max-width: $size-content-width-max; */
-/* @media screen and (min-width: 768px) {
-    border: 2px solid blue;
-  }
-
-  margin: 0 auto;
-} */
+<style lang="scss">
+.appContainer {
+	@include breakpoint(laptop) {
+		max-width: 800px;
+		margin: 0 auto;
+		margin-top: 52px;
+	}
+}
 </style>

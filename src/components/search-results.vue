@@ -11,7 +11,7 @@ export default {
 };
 </script>
 <template>
-	<div>
+	<div class="container">
 		<ul class="searchResults">
 			<li
 				class="searchResults__result"
@@ -26,6 +26,9 @@ export default {
 </template>
 
 <style lang="scss">
+.container {
+	background-color: #f9f9f9;
+}
 .searchResults {
 	list-style: none;
 	margin: 0;
