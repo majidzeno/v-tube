@@ -29,9 +29,7 @@ export default {
 		this.$route.params.playlistId &&
 			_getPlaylistById(this.$route.params.playlistId)
 				.then((res) => {
-					console.log("res-->", res);
 					this.videos = [...res.data.items];
-					console.log("this.videos-->", this.videos);
 				})
 				.catch((error) => console.log("Error in getting channel data", error));
 	},
@@ -40,30 +38,22 @@ export default {
 
 <template>
 	<Layout>
-		<h2>Playlist Id is {{ id }}</h2>
-		<!-- <h1>
-			{{ this.playlistDetails.snippet && this.playlistDetails.snippet.title }}
-		</h1>
-		<img
-			:src="
-				this.playlistDetails.snippet &&
-					this.playlistDetails.snippet.thumbnails.medium.url
-			"
-			alt="channel-image"
-		/>
-		<p>{{ this.playlistDetails.description }}</p> -->
-
-		<ul>
-			<li v-for="result in this.videos" :key="result.etag">
-				<PlaylistItem :result="result" />
-			</li>
-		</ul>
+		<div class="playlistpage">
+			<ul class="searchResults">
+				<li
+					class="searchResults__result"
+					v-for="result in this.videos"
+					:key="result.etag"
+				>
+					<PlaylistItem :result="result" />
+				</li>
+			</ul>
+		</div>
 	</Layout>
 </template>
 
 <style lang="scss">
-/* @import "./app"; */
-div {
-	background-color: "purple";
+.playlistpage {
+	margin-top: 5em;
 }
 </style>

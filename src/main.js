@@ -17,9 +17,14 @@ Vue.filter("formatDate", function(value) {
 	let date = new Date(value);
 	return date.toISOString().substring(0, 10);
 });
+Vue.filter("numberWithCommas", function(value) {
+	if (!value) return "";
+	return value.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+});
+
 Vue.filter("trimExcerpt", function(value) {
 	if (!value) return "";
-	return value.replace(/^(.{100}[^\s]*).*/, "$1....");
+	return value.replace(/^(.{100}[^\s]*).*/, "$1");
 });
 
 export const eventBus = new Vue();

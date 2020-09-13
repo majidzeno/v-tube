@@ -30,7 +30,9 @@ export default {
 				<p class="video__trail">
 					Published at {{ result.snippet.publishedAt | formatDate }}
 				</p>
-				<!-- <p class="video__description">{{ result.snippet.description }}</p> -->
+				<p class="video__description">
+					{{ result.snippet.description | trimExcerpt }}
+				</p>
 			</div>
 		</div>
 		<div class="channel" v-if="result.id.channelId">
@@ -95,7 +97,11 @@ export default {
 	display: flex;
 	align-items: flex-start;
 	justify-content: center;
-	padding: 3% 2%;
+	padding: 0 2%;
+	max-height: 14em;
+	overflow: hidden;
+	height: 100%;
+	margin: 3% 0;
 }
 .video {
 	@extend %resultContainer;

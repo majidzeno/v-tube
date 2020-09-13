@@ -44,12 +44,15 @@ export default {
 
 <template>
 	<Layout>
-		<youtube :video-id="this.$route.params.videoId"></youtube>
-		<div class="card-body">
-			<h5 class="card-title">
+		<youtube
+			class="videoPlayer"
+			:video-id="this.$route.params.videoId"
+		></youtube>
+		<div class="video__wrapper ">
+			<h3 class="video__title">
 				{{ this.videoDetails.snippet && this.videoDetails.snippet.title }}
-			</h5>
-			<h6 class="card-subtitle">
+			</h3>
+			<h6 class="video__subtitle">
 				{{
 					this.videoDetails.snippet && this.videoDetails.snippet.channelTitle
 				}}
@@ -59,22 +62,34 @@ export default {
 						this.videoDetails.snippet.publishedAt | formatDate
 				}}
 			</h6>
-			<p class="card-text">
+			<p class="video__description">
 				{{ this.videoDetails.snippet && this.videoDetails.snippet.description }}
 			</p>
 		</div>
-		<ul>
-			<li v-for="result in this.relatedVideos" :key="result.etag">
+		<ul class="searchResults">
+			<li
+				class="searchResults__result"
+				v-for="result in this.relatedVideos"
+				:key="result.etag"
+			>
 				<Item :result="result" />
 			</li>
 		</ul>
-		<!-- <h1 v-else>Loading</h1> -->
 	</Layout>
 </template>
 
 <style lang="scss">
-/* @import "./app"; */
-div {
-	background-color: "purple";
+.videoPlayer {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-top: 5em;
+	background-color: #000;
+}
+.video {
+	&__wrapper {
+		margin-top: 2em;
+		border-bottom: 1px solid $color-border;
+	}
 }
 </style>

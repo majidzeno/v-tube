@@ -2,34 +2,38 @@
 <!-- :to="'video' + result.snippet.resourceId.videoId" -->
 
 <template>
-	<div>
-		<RouterLink
-			v-if="result.snippet.resourceId.videoId"
-			:to="{
-				name: 'video',
-				params: { videoId: result.snippet.resourceId.videoId },
-			}"
-		>
-			<h1>This is video</h1>
-			<img
-				class=""
-				:src="result.snippet.thumbnails.medium.url"
-				alt="YouTube thumbnail"
-			/>
-		</RouterLink>
-		<div class="card-body">
-			<h5 class="card-title">{{ result.snippet.title }}</h5>
-			<h6 class="card-subtitle">
-				{{ result.snippet.channelTitle }} |
-				{{ result.snippet.publishedAt | formatDate }}
-			</h6>
-			<p class="card-text">{{ result.snippet.description }}</p>
+	<div class="ytContainer">
+		<div class="video" v-if="result.snippet.resourceId.videoId">
+			<RouterLink
+				class="video__link"
+				:to="{
+					name: 'video',
+					params: { videoId: result.snippet.resourceId.videoId },
+				}"
+			>
+				<img
+					:src="result.snippet.thumbnails.medium.url"
+					alt="YouTube thumbnail"
+				/>
+			</RouterLink>
+			<div class="video__body">
+				<h3 class="video__title">{{ result.snippet.title }}</h3>
+				<p class="video__subtitle">
+					{{ result.snippet.channelTitle }}
+				</p>
+				<p class="video__trail">
+					Published at {{ result.snippet.publishedAt | formatDate }}
+				</p>
+				<p class="video__description">
+					{{ result.snippet.description | trimExcerpt }}
+				</p>
+			</div>
 		</div>
 	</div>
 </template>
 <script>
 export default {
-	name: "Item",
+	name: "PlaylistItem",
 	props: ["result"],
 };
 </script>

@@ -7,8 +7,8 @@ import _ from "lodash";
 export default {
 	data() {
 		return {
-			// keyword: this.$route.query.query || "spongebob",
-			keyword: "Spongebob",
+			keyword: this.$route.query.query,
+			// keyword: "Spongebob",
 			lastKeyword: "",
 		};
 	},
@@ -98,8 +98,14 @@ export default {
 	justify-content: space-between;
 	align-items: stretch;
 	@include breakpoint(laptop) {
-		max-width: 90%;
+		max-width: 80%;
+		margin: 0 auto;
 	}
+	@include breakpoint(large) {
+		max-width: 1000px;
+		margin: 0 auto;
+	}
+
 	&__logo {
 		max-width: 12%;
 		width: 100%;
