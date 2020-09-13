@@ -33,7 +33,6 @@ export default {
 			_getRelatedVideos(this.$route.params.videoId)
 				.then((res) => {
 					this.relatedVideos = [...res.data.items];
-					console.log("related", this.relatedVideos);
 				})
 				.catch((error) =>
 					console.log("Error in getting related videos", error)

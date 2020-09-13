@@ -94,11 +94,8 @@ export default {
 			this.loading = true;
 			this.filter.kind = "type";
 			this.filter.arg = type;
-			console.log("type", type);
-			console.log("this.keyword", this.keyword);
 			_filterByType(this.keyword, type)
 				.then((res) => {
-					console.log("res", res);
 					this.results = [];
 					this.results = [...res.data.items];
 					this.results = Array.from(

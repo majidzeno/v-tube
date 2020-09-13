@@ -30,7 +30,6 @@ export default {
 		this.$route.params.channelId &&
 			_getChannelById(this.$route.params.channelId)
 				.then((res) => {
-					console.log("res-->", res);
 					this.channelDetails = res.data.items[0];
 					_getChannelVideos(
 						this.channelDetails.contentDetails.relatedPlaylists.uploads

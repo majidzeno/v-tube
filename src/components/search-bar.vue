@@ -8,7 +8,6 @@ export default {
 	data() {
 		return {
 			keyword: this.$route.query.query,
-			// keyword: "Spongebob",
 			lastKeyword: "",
 		};
 	},

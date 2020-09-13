@@ -1,6 +1,4 @@
 <!-- @format -->
-<!-- :to="'video' + result.snippet.resourceId.videoId" -->
-
 <template>
 	<div class="ytContainer">
 		<div class="video" v-if="result.snippet.resourceId.videoId">
