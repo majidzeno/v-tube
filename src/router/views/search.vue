@@ -409,7 +409,7 @@ export default {
 }
 .filter-cell {
 	padding: 3%;
-	width: 50%;
+	width: 56%;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
